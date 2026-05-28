@@ -1,0 +1,50 @@
+# .NET build
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+out/
+build/
+*.swp
+*.*~
+project.lock.json
+.DS_Store
+*.pyc
+nupkg/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+.idea/
+
+# .NET tools
+.dotnet/
+
+# Local secrets — TÜM appsettings.Development.json + .Local.json secret içerir, commit etme
+appsettings.Local.json
+appsettings.Development.json
+appsettings.Development.local.json
+secrets.json
+.env
+.env.*
+!.env.example
+!appsettings.Development.example.json
+
+# EF Core temp files
+*.MigrationBackup
+
+# Test results
+TestResults/
+[Cc]overage*/
+*.coverage
+*.coveragexml
+
+# Hangfire local
+hangfire-data/
+
+# Docker
+.docker/

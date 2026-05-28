@@ -1,0 +1,113 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: folkie-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - folkie
+
+  seq:
+    image: datalust/seq:latest
+    container_name: folkie-seq
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD}
+    volumes:
+      - seq_data:/data
+    ports:
+      # Bind only on loopback — host nginx will reverse-proxy seq.folkie.com.tr → 127.0.0.1:5341
+      - "127.0.0.1:5341:80"
+    networks:
+      - folkie
+
+  folkie-api:
+    image: folkie-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: folkie-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5069
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Clerk__Issuer: ${CLERK_AUTHORITY}
+      Clerk__WebhookSecret: ${CLERK_WEBHOOK_SECRET}
+      Gemini__ApiKey: ${GEMINI_API_KEY}
+      Resend__ApiKey: ${RESEND_API_KEY}
+      Resend__FromAddress: ${RESEND_FROM}
+      Contabo__Endpoint: ${CONTABO_ENDPOINT}
+      Contabo__Region: ${CONTABO_REGION}
+      Contabo__Bucket: ${CONTABO_BUCKET}
+      Contabo__AccessKey: ${CONTABO_ACCESS_KEY}
+      Contabo__SecretKey: ${CONTABO_SECRET_KEY}
+      Cors__AllowedOrigins__0: "https://${PUBLIC_DOMAIN}"
+      Cors__AllowedOrigins__1: "https://www.${PUBLIC_DOMAIN}"
+      Serilog__SeqUrl: http://seq:80
+      TikTok__ClientKey: ${TIKTOK_CLIENT_KEY}
+      TikTok__ClientSecret: ${TIKTOK_CLIENT_SECRET}
+      TikTok__RedirectUri: "https://${PUBLIC_DOMAIN}/creator/tiktok-callback"
+      TikTok__Sandbox: ${TIKTOK_SANDBOX:-false}
+    volumes:
+      - api_keys:/app/keys
+    ports:
+      # Loopback only — host nginx proxies /api/* and /hubs/* and /webhooks/* → 127.0.0.1:5069
+      - "127.0.0.1:5069:5069"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - folkie
+
+  folkie-web:
+    image: folkie-web:latest
+    build:
+      context: ../folkie_web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+        NEXT_PUBLIC_API_URL: "https://${PUBLIC_DOMAIN}"
+        NEXT_PUBLIC_SIGNALR_URL: "https://${PUBLIC_DOMAIN}/hubs/messaging"
+        NEXT_PUBLIC_APP_URL: "https://${PUBLIC_DOMAIN}"
+        NEXT_PUBLIC_TIKTOK_CLIENT_KEY: ${TIKTOK_CLIENT_KEY}
+    container_name: folkie-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: "https://${PUBLIC_DOMAIN}"
+      NEXT_PUBLIC_SIGNALR_URL: "https://${PUBLIC_DOMAIN}/hubs/messaging"
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_APP_URL: "https://${PUBLIC_DOMAIN}"
+      NEXT_PUBLIC_TIKTOK_CLIENT_KEY: ${TIKTOK_CLIENT_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+      BACKEND_INTERNAL_URL: http://folkie-api:5069
+    ports:
+      # Loopback only — host nginx proxies / → 127.0.0.1:3000
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - folkie-api
+    networks:
+      - folkie
+
+volumes:
+  postgres_data:
+  seq_data:
+  api_keys:
+
+networks:
+  folkie:
+    driver: bridge
