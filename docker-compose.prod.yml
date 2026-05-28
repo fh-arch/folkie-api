@@ -86,6 +86,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
       NEXT_PUBLIC_API_URL: "https://${PUBLIC_DOMAIN}"
       NEXT_PUBLIC_SIGNALR_URL: "https://${PUBLIC_DOMAIN}/hubs/messaging"
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
