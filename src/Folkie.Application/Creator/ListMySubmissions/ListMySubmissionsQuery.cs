@@ -71,7 +71,7 @@ public sealed class ListMySubmissionsHandler
                 x.Campaign.Title,
                 x.Brand.BrandName,
                 x.Brand.LogoUrl,
-                x.Submission.Status.ToString().ToLower(),
+                System.Text.RegularExpressions.Regex.Replace(x.Submission.Status.ToString(), "([A-Z])", "_$1").TrimStart('_').ToLower(),
                 x.Submission.VideoUrl,
                 x.Submission.ExternalVideoUrl,
                 x.Submission.Script,
