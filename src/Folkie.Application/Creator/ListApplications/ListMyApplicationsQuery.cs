@@ -18,7 +18,8 @@ public sealed record MyApplicationDto(
     string Status,
     string? RejectionReason,
     DateTimeOffset AppliedAt,
-    DateTimeOffset? ReviewedAt);
+    DateTimeOffset? ReviewedAt,
+    DateOnly PublishEndDate);
 
 public sealed class ListMyApplicationsHandler
     : IRequestHandler<ListMyApplicationsQuery, List<MyApplicationDto>>
@@ -68,7 +69,8 @@ public sealed class ListMyApplicationsHandler
                 a.Status.ToString().ToLower(),
                 a.RejectionReason,
                 a.AppliedAt,
-                a.ReviewedAt))
+                a.ReviewedAt,
+                _db.Campaigns.Where(c => c.Id == a.CampaignId).Select(c => c.PublishEndDate).FirstOrDefault()))
             .ToListAsync(ct);
     }
 }
