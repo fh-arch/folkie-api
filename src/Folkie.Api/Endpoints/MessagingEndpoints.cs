@@ -39,7 +39,7 @@ public static class MessagingEndpoints
             var id = await m.Send(new StartConversationCommand(
                 body.OtherUserId,
                 body.CampaignId,
-                body.Subject,
+                body.Subject ?? "Direct Message",
                 body.FirstMessage), ct);
             return Results.Created($"/api/v1/messaging/conversations/{id}", new { id });
         })
@@ -53,5 +53,5 @@ public sealed record SendBody(string Body);
 public sealed record StartConvBody(
     Guid OtherUserId,
     Guid? CampaignId,
-    string Subject,
+    string? Subject,
     string? FirstMessage);

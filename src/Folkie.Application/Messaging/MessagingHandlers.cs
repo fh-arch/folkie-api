@@ -206,7 +206,7 @@ public sealed class SendMessageHandler : IRequestHandler<SendMessageCommand, Gui
 public sealed record StartConversationCommand(
     Guid OtherUserId,
     Guid? CampaignId,
-    string Subject,
+    string? Subject,
     string? FirstMessage) : IRequest<Guid>;
 
 public sealed class StartConversationHandler : IRequestHandler<StartConversationCommand, Guid>
@@ -239,7 +239,7 @@ public sealed class StartConversationHandler : IRequestHandler<StartConversation
 
         if (existing is not null) return existing.Id;
 
-        var conv = Conversation.Create(brandUserId, creatorUserId, cmd.Subject, cmd.CampaignId);
+        var conv = Conversation.Create(brandUserId, creatorUserId, cmd.Subject ?? "Direct Message", cmd.CampaignId);
         _db.Conversations.Add(conv);
         await _db.SaveChangesAsync(ct);
 
