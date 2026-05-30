@@ -81,7 +81,7 @@ services:
         NEXT_PUBLIC_API_URL: "https://${PUBLIC_DOMAIN}"
         NEXT_PUBLIC_SIGNALR_URL: "https://${PUBLIC_DOMAIN}/hubs/messaging"
         NEXT_PUBLIC_APP_URL: "https://${PUBLIC_DOMAIN}"
-        NEXT_PUBLIC_TIKTOK_CLIENT_KEY: ${TIKTOK_CLIENT_KEY}
+        NEXT_PUBLIC_TIKTOK_CLIENT_KEY: ${TIKTOK_WEB_CLIENT_KEY:-}
     container_name: folkie-web
     restart: unless-stopped
     environment:
