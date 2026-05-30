@@ -95,7 +95,7 @@ public sealed class GetBrandCampaignHandler
             c.PublishEndDate,
             c.IsFlashCampaign,
             c.FlashPublishTime,
-            c.Status.ToString().ToLower(),
+            System.Text.RegularExpressions.Regex.Replace(c.Status.ToString(), "([A-Z])", "_$1").TrimStart('_').ToLower(),
             appCount,
             approvedCount,
             c.CreatedAt);

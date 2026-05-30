@@ -57,7 +57,7 @@ public sealed class ListCampaignsHandler
                 c.Id,
                 c.Title,
                 c.ProductCategory,
-                Status = c.Status.ToString().ToLower(),
+                Status = System.Text.RegularExpressions.Regex.Replace(c.Status.ToString(), "([A-Z])", "_$1").TrimStart('_').ToLower(),
                 c.BrandProfileId,
                 BrandProfile = _db.BrandProfiles
                     .Where(b => b.Id == c.BrandProfileId)

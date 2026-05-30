@@ -74,7 +74,7 @@ public sealed class ListBrandCampaignsHandler
                 c.Id,
                 c.Title,
                 c.ProductCategory,
-                c.Status.ToString().ToLower(),
+                ToSnakeCase(c.Status.ToString()),
                 c.BudgetPerInfluencer * c.InfluencerCount,
                 c.InfluencerCount,
                 c.ApplicationCount,
@@ -83,5 +83,14 @@ public sealed class ListBrandCampaignsHandler
                 c.IsFlashCampaign,
                 c.CreatedAt))
             .ToList();
+    }
+
+    private static string ToSnakeCase(string s)
+    {
+        var result = System.Text.RegularExpressions.Regex
+            .Replace(s, "([A-Z])", "_$1")
+            .TrimStart('_')
+            .ToLower();
+        return result;
     }
 }
