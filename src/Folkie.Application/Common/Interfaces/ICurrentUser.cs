@@ -17,6 +17,9 @@ public interface ICurrentUser
 
     bool IsAuthenticated { get; }
 
+    /// <summary>True when request is authenticated via super admin API key (no Clerk).</summary>
+    bool IsSuperAdmin { get; }
+
     /// <summary>
     /// Folkie DB'sinden kullanıcıyı yükler. Kayıt yoksa null döner.
     /// Aynı request içinde cache'lenir.
