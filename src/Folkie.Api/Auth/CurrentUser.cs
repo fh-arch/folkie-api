@@ -20,11 +20,25 @@ public sealed class CurrentUser : ICurrentUser
     public UserRole? Role { get; }
     public bool IsAuthenticated => !string.IsNullOrEmpty(ClerkUserId);
 
+    public bool IsSuperAdmin { get; }
+
     public CurrentUser(IHttpContextAccessor accessor, IFolkieDbContext db)
     {
         _db = db;
 
-        var principal = accessor.HttpContext?.User;
+        var ctx = accessor.HttpContext;
+        if (ctx is null) return;
+
+        // Super admin bypass — API key validated in SuperAdminKeyMiddleware
+        if (ctx.Items.ContainsKey("IsSuperAdmin"))
+        {
+            IsSuperAdmin = true;
+            Role = UserRole.Admin;
+            ClerkUserId = "__superadmin__";
+            return;
+        }
+
+        var principal = ctx.User;
         if (principal?.Identity?.IsAuthenticated != true) return;
 
         ClerkUserId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -38,6 +52,7 @@ public sealed class CurrentUser : ICurrentUser
 
     public async Task<User?> GetUserAsync(CancellationToken ct = default)
     {
+        if (IsSuperAdmin) return null; // super admin has no DB user
         if (_loaded) return _cachedUser;
         if (string.IsNullOrEmpty(ClerkUserId))
         {
@@ -53,8 +68,13 @@ public sealed class CurrentUser : ICurrentUser
 
     public async Task<User> RequireUserAsync(CancellationToken ct = default)
     {
+        if (IsSuperAdmin)
+            throw new InvalidOperationException("Super admin context — use IsSuperAdmin check instead.");
         var user = await GetUserAsync(ct);
-        return user ?? throw new UnauthorizedAccessException(
-            "Folkie kullanıcı kaydı bulunamadı. Webhook çalışmamış olabilir.");
+        if (user is null)
+            throw new UnauthorizedAccessException("Folkie kullanıcı kaydı bulunamadı.");
+        if (user.IsBlocked)
+            throw new UnauthorizedAccessException("Bu hesap askıya alınmıştır.");
+        return user;
     }
 }

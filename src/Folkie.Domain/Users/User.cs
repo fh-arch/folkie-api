@@ -9,6 +9,9 @@ public class User : Entity
     public UserRole Role { get; private set; }
     public string? FullName { get; private set; }
     public string? AvatarUrl { get; private set; }
+    public bool IsBlocked { get; private set; }
+    public string? BlockedReason { get; private set; }
+    public DateTimeOffset? BlockedAt { get; private set; }
 
     private User() { }
 
@@ -40,6 +43,22 @@ public class User : Entity
     public void UpdateEmail(string email)
     {
         Email = email;
+        Touch();
+    }
+
+    public void Block(string reason)
+    {
+        IsBlocked = true;
+        BlockedReason = reason;
+        BlockedAt = DateTimeOffset.UtcNow;
+        Touch();
+    }
+
+    public void Unblock()
+    {
+        IsBlocked = false;
+        BlockedReason = null;
+        BlockedAt = null;
         Touch();
     }
 }

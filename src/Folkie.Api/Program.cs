@@ -90,6 +90,7 @@ using (var scope = app.Services.CreateScope())
 
 // ─── Pipeline ────────────────────────────────────────────────────
 app.UseSerilogRequestLogging();
+app.UseMiddleware<SuperAdminKeyMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -129,6 +130,7 @@ app.MapCreatorEndpoints();
 app.MapBrandEndpoints();
 app.MapSubmissionEndpoints();
 app.MapAdminEndpoints();
+app.MapSuperAdminEndpoints();
 app.MapNotificationEndpoints();
 app.MapMessagingEndpoints();
 app.MapFileEndpoints();

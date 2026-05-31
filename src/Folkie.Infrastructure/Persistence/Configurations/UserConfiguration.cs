@@ -17,5 +17,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(x => x.Role).HasConversion<int>();
         b.Property(x => x.FullName).HasMaxLength(255);
         b.Property(x => x.AvatarUrl).HasMaxLength(2048);
+        b.Property(x => x.IsBlocked).HasDefaultValue(false);
+        b.Property(x => x.BlockedReason).HasMaxLength(1000);
     }
 }
