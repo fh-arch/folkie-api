@@ -60,6 +60,7 @@ services:
       TikTok__ClientSecret: ${TIKTOK_CLIENT_SECRET}
       TikTok__RedirectUri: "https://${PUBLIC_DOMAIN}/creator/tiktok-callback"
       TikTok__Sandbox: ${TIKTOK_SANDBOX:-false}
+      SuperAdmin__ApiKey: ${SUPERADMIN_API_KEY}
     volumes:
       - api_keys:/app/keys
     ports:
@@ -96,6 +97,10 @@ services:
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
       BACKEND_INTERNAL_URL: http://folkie-api:5069
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD}
+      SUPERADMIN_SESSION_SECRET: ${SUPERADMIN_SESSION_SECRET}
+      SUPERADMIN_API_KEY: ${SUPERADMIN_API_KEY}
     ports:
       # Loopback only — host nginx proxies / → 127.0.0.1:3000
       - "127.0.0.1:3000:3000"
