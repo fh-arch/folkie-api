@@ -219,7 +219,7 @@ public static class SuperAdminEndpoints
         }).WithName("SuperAdminConfirmBrandPayment");
 
         // ── Mark creator payout transferred ──────────────────────
-        g.MapPost("/payments/{id:guid}/transfer", async (Guid id, TransferBody body, IFolkieDbContext db, ICurrentUser cu, CancellationToken ct) =>
+        g.MapPost("/payments/{id:guid}/transfer", async (Guid id, SuperTransferBody body, IFolkieDbContext db, ICurrentUser cu, CancellationToken ct) =>
         {
             if (!cu.IsSuperAdmin) return Results.Forbid();
             var payment = await db.Payments.FindAsync([id], ct);
@@ -234,5 +234,5 @@ public static class SuperAdminEndpoints
 }
 
 public sealed record BlockBody(string Reason);
-public sealed record TransferBody(string Reference);
+public sealed record SuperTransferBody(string Reference);
 public sealed record ConfirmBody(string? Reference, string? Note);
